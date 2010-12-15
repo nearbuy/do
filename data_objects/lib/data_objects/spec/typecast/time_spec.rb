@@ -62,7 +62,7 @@ shared 'supporting Time' do
 
   end
 
-  describe 'writing an Time' do
+  describe 'writing a Time' do
 
     before do
       @reader = @connection.create_command("SELECT id FROM widgets WHERE release_datetime = ? ORDER BY id").execute_reader(Time.local(2008, 2, 14, 00, 31, 12))
