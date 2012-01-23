@@ -198,25 +198,27 @@ VALUE data_objects_parse_date(const char *date) {
 }
 
 VALUE data_objects_parse_time(const char *date) {
-  static char const* const _fmt_datetime = "%4d-%2d-%2d %2d:%2d:%2d%7lf";
-  int year = 0, month = 0, day = 0, hour = 0, min = 0, sec = 0, usec = 0;
-  double subsec = 0;
 
-  switch (sscanf(date, _fmt_datetime, &year, &month, &day, &hour, &min, &sec, &subsec)) {
-    case 0:
-    case EOF:
-      return Qnil;
-  }
+  int year, month, day, hour, min, sec, usec, tokens;
+  float subsec;
 
-  usec = (int) (subsec * 1000000);
-
-  /* Mysql TIMESTAMPS can default to 0 */
-  if ((year + month + day + hour + min + sec + usec) == 0) {
-    return Qnil;
+  if (0 != strchr(date, '.')) {
+    // right padding usec with 0. e.g. '012' will become 12000 microsecond, since Time#local use microsecond
+    sscanf(date, "%4d-%2d-%2d %2d:%2d:%2d%f", &year, &month, &day, &hour, &min, &sec, &subsec);
+    usec = subsec*1000000;
+  } else {
+    tokens = sscanf(date, "%4d-%2d-%2d %2d:%2d:%2d", &year, &month, &day, &hour, &min, &sec);
+    if (tokens == 3) {
+      hour = 0;
+      min  = 0;
+      sec  = 0;
+    }
+    usec = 0;
   }
 
   return rb_funcall(rb_cTime, rb_intern("local"), 7, INT2NUM(year), INT2NUM(month), INT2NUM(day), INT2NUM(hour), INT2NUM(min), INT2NUM(sec), INT2NUM(usec));
 }
+
 
 VALUE data_objects_parse_date_time(const char *date) {
   static char const* const _fmt_datetime_tz_normal = "%4d-%2d-%2d%*c%2d:%2d:%2d%3d:%2d";
