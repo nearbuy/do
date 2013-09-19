@@ -464,7 +464,6 @@ void do_postgres_full_connect(VALUE self, PGconn *db) {
   }
 
   VALUE encoding = rb_iv_get(self, "@encoding");
-#ifdef HAVE_PQSETCLIENTENCODING
   VALUE pg_encoding = rb_hash_aref(data_objects_const_get(mEncoding, "MAP"), encoding);
 
   if (pg_encoding != Qnil) {
@@ -487,7 +486,6 @@ void do_postgres_full_connect(VALUE self, PGconn *db) {
 #endif
     rb_iv_set(self, "@pg_encoding", rb_str_new2("UTF8"));
   }
-#endif
 
   rb_iv_set(self, "@connection", Data_Wrap_Struct(rb_cObject, 0, 0, db));
 }
